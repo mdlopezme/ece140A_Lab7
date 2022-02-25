@@ -14,4 +14,7 @@ Tesseract and PyTesseract were installed for OCR. PyTesseract was used with Open
 The default settings did not result in any extracted values. Some things learned:  
 - Tesseract does not work very well with single characters. Strings are better.
 - The current version prefers black text on white backgrounds.
-- The best results were obtained on an image with minimal blurring and with threshold applied.
+- The best results for this example were obtained on an image with minimal blurring, with threshold applied, and with a little bit of padding on each cropped segment.
+- We tried removing the borders from the Sudoku grid, but that resulted in less number detection.
+
+
