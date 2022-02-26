@@ -86,9 +86,10 @@ if type(location) != type(None):
     # cv2.imshow('result',result)
     # cv2.waitKey(0) 
     # cv2.destroyAllWindows()
+    
 print('Extracting the Numbers')
 
-# pad numpy arrays helper
+# pad numpy arrays helper from numpy.org
 def pad_with(vector, pad_width, iaxis, kwargs):
     pad_value = kwargs.get('padder', 10)
     vector[:pad_width[0]] = pad_value
