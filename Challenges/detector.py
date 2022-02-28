@@ -95,6 +95,16 @@ class Detector:
 				maxArea = rect_area
 				self.coords = contour
 
+	def get_text(self):
+		'''Get the lincense plate string from the crop image'''
+		
+		# Make a cropped image if not already done
+		if self.plate is None:
+			self.detect_plate()
+
+		roi = self.plate # :P
+		self.text = 'UNDER DEVELOPMENT'
+
 def main():
 	img1 = Detector('Challenges/public/images/Delaware_Plate.png','Delaware', True)
 	img2 = Detector('Challenges/public/images/Contrast.jpg','Contrast', True)
