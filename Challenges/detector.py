@@ -2,7 +2,7 @@ import cv2 as cv
 import numpy as np
 
 class Detector:
-	def __init__(self, img_name, img_path, debug=False):
+	def __init__(self, img_path, img_name='default', debug=False):
 		# Set window name when showing the image
 		self.winName = img_name
 
@@ -96,9 +96,9 @@ class Detector:
 				self.coords = contour
 
 def main():
-	img1 = Detector('Delaware','Challenges/public/images/Delaware_Plate.png', True)
-	img2 = Detector('Contrast','Challenges/public/images/Contrast.jpg', True)
-	img3 = Detector('Arizonas','Challenges/public/images/Arizona_47.jpg', True)
+	img1 = Detector('Challenges/public/images/Delaware_Plate.png','Delaware', True)
+	img2 = Detector('Challenges/public/images/Contrast.jpg','Contrast', True)
+	img3 = Detector('Challenges/public/images/Arizona_47.jpg','Arizonas', True)
 
 	cv.waitKey(0)
 
