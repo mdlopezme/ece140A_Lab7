@@ -13,9 +13,11 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         })
         .then( function (){
-            console.log(dropdown.value)
-            car_image.src = 'images/' + dropdown.value
-            car_image.alt = dropdown.value
-        }
-        )
+            on_change()
+        })
 });
+
+function on_change(){
+    car_image.src = 'images/' + dropdown.value
+    car_image.alt = dropdown.value
+}
