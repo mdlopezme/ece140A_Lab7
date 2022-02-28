@@ -24,12 +24,14 @@ class Webserver():
             config.add_route('names', '/names')
             config.add_route('frame', '/frame')
             config.add_route('detect', '/detect')
+            config.add_route('plate', '/plate')
 
             # Creates views for routes
             config.add_view(self.get_home, route_name='home')
             config.add_view(self.get_names, route_name='names', renderer='json')
             config.add_view(self.get_frame, route_name='frame')
             config.add_view(self.make_detector, route_name='detect', renderer='json')
+            config.add_view(self.get_plate, route_name='plate')
 
             # Create static routes
             config.add_static_view(name='/', path='main:public/')
@@ -66,6 +68,11 @@ class Webserver():
     def get_frame(self,req):
         cv.imwrite(self.pub_path+'/temp/frame.jpg',self.detector.frame)
         return FileResponse(self.pub_path+'/temp/frame.jpg')
+
+    def get_plate(self,req):
+        self.detector.detect_plate()
+        cv.imwrite(self.pub_path+'/temp/plate.jpg',self.detector.plate)
+        return FileResponse(self.pub_path+'/temp/plate.jpg')
 
 if __name__ == '__main__':
     app = Webserver('./Challenges')

@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", function() {
     dropdown = document.getElementById('dropdown_selection');
     car_image = document.getElementById('car_image')
+    plate_plate = document.getElementById('car_plate')
     lincese = document.getElementById('license')
 
     fetch('/names')
@@ -26,8 +27,14 @@ function on_change(){
             console.log('Sucess making object: ' + response.url)
         })
 
-    
+    // Set frame parameters
     car_image.src = 'frame?image=' + dropdown.value
     car_image.alt = dropdown.value
+
+    // Set plate parameters
+    car_plate.src = 'plate?image=' + dropdown.value
+    car_image.alt = dropdown.value
+
+    // Set PLate String
     lincese.innerHTML = 'TEMPLATE'
 }
