@@ -22,7 +22,7 @@ class Webserver():
             config.add_view(self.get_names, route_name='names', renderer='json')
 
             # Create static routes
-            config.add_static_view(name='/', path=self.img_path, cache_max_age=3600)
+            config.add_static_view(name='/', path='main:public/')
 
             app = config.make_wsgi_app()
 
@@ -44,11 +44,11 @@ class Webserver():
     def get_names(self,req):
         names = [f for f in listdir(self.img_path) if isfile(join(self.img_path, f))]
 
-        print(names)
+        names.sort()
         return names
 
 if __name__ == '__main__':
-    app = Webserver('Challenges')
+    app = Webserver('./Challenges')
    
     try:
         app.start()
