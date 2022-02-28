@@ -53,6 +53,7 @@ class Detector:
 	
 	def get_perspective(self, contour, height = 500, width = 500):
 		'''Get rectagular crop from a contour'''
+		# FIXME: The images are coming out at random rotations. This needs to be fixed.
 		rect = cv.minAreaRect(contour)
 		box = cv.boxPoints(rect)
 		location = np.int0(box)
