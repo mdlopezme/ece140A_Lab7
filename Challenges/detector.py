@@ -39,7 +39,7 @@ class Detector:
 		rect = cv.minAreaRect(self.coords)
 		box = cv.boxPoints(rect)
 		box = np.int0(box)
-		cv.drawContours(tempFrame,[box],0,(0,0,255),2)
+		cv.drawContours(tempFrame,[self.coords],0,(0,0,255),2)
 		cv.imshow(self.winName,tempFrame)
 		cv.imshow(self.winName+'1', self.plate)
 
@@ -48,28 +48,27 @@ class Detector:
 		This function detects the number plate in the image 
 		and returns a cropped image focused on the number plate.
 		'''
-		self.coords = self.find_rect_contour()
-		self.plate = self.get_perspective(self.coords)
+		self.__find_rect_contour()
+		self.__calc_perspective()
+
+		return self.plate
 	
-	def get_perspective(self, contour, height = 500, width = 500):
+	def __calc_perspective(self, height = 500, width = 500):
 		'''Get rectagular crop from a contour'''
-		# FIXME: The images are coming out at random rotations. This needs to be fixed.
-		rect = cv.minAreaRect(contour)
+		# FIXME: The images are coming out at random rotations. This needs to be fixed. Needs better algo?
+		if self.coords is None:
+			self.__find_rect_contour()
+
+		rect = cv.minAreaRect(self.coords)
 		box = cv.boxPoints(rect)
 		location = np.int0(box)
 		pts1 = np.float32([location[0], location[3], location[1], location[2]])
 		pts2 = np.float32([[0, 0], [width, 0], [0, height], [width, height]])
 		# Apply Perspective Transform Algorithm
 		matrix = cv.getPerspectiveTransform(pts1, pts2)
-		result = cv.warpPerspective(self.frame, matrix, (width, height))
-		return result
+		self.plate = cv.warpPerspective(np.copy(self.frame), matrix, (width, height))
 
-		## Simple Method of cropping image
-		# (x,y,w,h) = cv.boundingRect(box)
-		# crop = self.frame[y:y+h,x:x+w]
-		# return cv.resize(crop, (height,width))
-
-	def find_rect_contour(self):
+	def __find_rect_contour(self):
 		'''Find the largest rectagular contour in the frame'''
 		gray = cv.cvtColor(self.frame,cv.COLOR_BGR2GRAY)
 		blur = cv.GaussianBlur(gray, (9,9), 0)
@@ -80,13 +79,11 @@ class Detector:
 			print("No quadrilaterals found")
 			return  np.array([ [-1, -1], [-1, -1], [-1, -1], [-1, -1] ])
 
-		maxContour = None
-		maxArea = 0
-
 		#  Find largest rectangle
+		maxArea = 0
 		for contour in contours:
 			peri = cv.arcLength(contour, True)
-			approx = cv.approxPolyDP(contour, 0.115*peri, True)
+			approx = cv.approxPolyDP(contour, self.epsilon*peri, True)
 			
 			if len(approx) != 4: # Next if not rectangular
 				continue
@@ -96,18 +93,12 @@ class Detector:
 			
 			if rect_area > maxArea:
 				maxArea = rect_area
-				maxContour = contour
-
-		return maxContour
+				self.coords = contour
 
 def main():
 	img1 = Detector('Delaware','Challenges/public/images/Delaware_Plate.png', True)
 	img2 = Detector('Contrast','Challenges/public/images/Contrast.jpg', True)
 	img3 = Detector('Arizonas','Challenges/public/images/Arizona_47.jpg', True)
-
-	# img1.detect_plate()
-	# img3.detect_plate()
-	# img2.detect_plate()
 
 	cv.waitKey(0)
 

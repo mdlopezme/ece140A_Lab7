@@ -28,6 +28,7 @@ class Webserver():
         print('Web server started on: http://localhost:6543')
         self.server_thread=threading.Thread(target=self.server.serve_forever,name="Web Server")
         self.server_thread.start()
+        self.server_thread.join()
 
     def stop(self):
         print("Ending web server")
@@ -38,4 +39,10 @@ class Webserver():
 
 if __name__ == '__main__':
     app = Webserver('Challenges')
-    app.start()
+   
+    try:
+        app.start()
+        # while(True):
+        #     sleep(100)
+    except KeyboardInterrupt:
+        app.stop()
