@@ -2,6 +2,8 @@ from wsgiref.simple_server import make_server
 from pyramid.response import Response, FileResponse
 from pyramid.config import Configurator
 import threading
+from os import listdir
+from os.path import isfile, join
 
 class Webserver():
     def __init__(self, root_path):
@@ -13,9 +15,11 @@ class Webserver():
         with Configurator() as config:
             # Add routes
             config.add_route('home', '/')
+            config.add_route('names', '/names')
 
             # Creates views for routes
             config.add_view(self.get_home, route_name='home')
+            config.add_view(self.get_names, route_name='names', renderer='json')
 
             # Create static routes
             config.add_static_view(name='/', path=self.img_path, cache_max_age=3600)
@@ -36,6 +40,12 @@ class Webserver():
     
     def get_home(self,req):
         return FileResponse(self.root_path+'/index.html')
+
+    def get_names(self,req):
+        names = [f for f in listdir(self.img_path) if isfile(join(self.img_path, f))]
+
+        print(names)
+        return names
 
 if __name__ == '__main__':
     app = Webserver('Challenges')
