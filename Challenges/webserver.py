@@ -1,9 +1,15 @@
+import imghdr
 from wsgiref.simple_server import make_server
+import cv2
 from pyramid.response import Response, FileResponse
 from pyramid.config import Configurator
 import threading
 from os import listdir
 from os.path import isfile, join
+from detector import Detector
+from PIL import Image
+import numpy as np
+import cv2 as cv
 
 class Webserver():
     def __init__(self, root_path):
@@ -16,10 +22,14 @@ class Webserver():
             # Add routes
             config.add_route('home', '/')
             config.add_route('names', '/names')
+            config.add_route('frame', '/frame')
+            config.add_route('detect', '/detect')
 
             # Creates views for routes
             config.add_view(self.get_home, route_name='home')
             config.add_view(self.get_names, route_name='names', renderer='json')
+            config.add_view(self.get_frame, route_name='frame')
+            config.add_view(self.make_detector, route_name='detect', renderer='json')
 
             # Create static routes
             config.add_static_view(name='/', path='main:public/')
@@ -46,6 +56,16 @@ class Webserver():
 
         names.sort()
         return names
+
+    def make_detector(self,req):
+        the_name=req.params['image']
+        self.detector = Detector(self.img_path+'/'+ the_name,'C',False)
+
+        return Response(f'[{the_name}]')
+
+    def get_frame(self,req):
+        cv.imwrite(self.pub_path+'/temp/frame.jpg',self.detector.frame)
+        return FileResponse(self.pub_path+'/temp/frame.jpg')
 
 if __name__ == '__main__':
     app = Webserver('./Challenges')

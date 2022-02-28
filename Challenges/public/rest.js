@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", function() {
     dropdown = document.getElementById('dropdown_selection');
     car_image = document.getElementById('car_image')
+    lincese = document.getElementById('license')
 
     fetch('/names')
         .then(response=>response.json())
@@ -18,6 +19,15 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 function on_change(){
-    car_image.src = 'images/' + dropdown.value
+    // Create image dector
+    fetch('/detect?image='+dropdown.value)
+        .then(response=>response)
+        .then(function(response){
+            console.log('Sucess making object: ' + response.url)
+        })
+
+    
+    car_image.src = 'frame?image=' + dropdown.value
     car_image.alt = dropdown.value
+    lincese.innerHTML = 'TEMPLATE'
 }
