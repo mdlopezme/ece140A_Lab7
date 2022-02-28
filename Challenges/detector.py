@@ -1,127 +1,115 @@
-from email.mime import image
-import cv2
-from cv2 import Canny
+import cv2 as cv
 import numpy as np
-from PIL import Image
-import pytesseract
-import time
 
-def get_perspective(img, location, height = 900, width = 900):
-	# cv2.imshow('passed in image',img)
-	pts1 = np.float32([location[0], location[3], location[1], location[2]])
-	pts2 = np.float32([[0, 0], [width, 0], [0, height], [width, height]])
-	# Apply Perspective Transform Algorithm
-	matrix = cv2.getPerspectiveTransform(pts1, pts2)
-	result = cv2.warpPerspective(img, matrix, (width, height))
-	# cv2.imshow('get_perspective',result)
-	# cv2.waitKey(0)
-	return result
+class Detector:
+	def __init__(self, img_name, img_path, debug=False):
+		# Set window name when showing the image
+		self.winName = img_name
 
-def detect_plate(img):
-	blur = cv2.GaussianBlur(img, (5, 5), 0)
-	# cv2.imshow('blur',blur)
-	# cv2.waitKey(0)
-	thresh = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
-	cv2.imshow('thresh',thresh)
-	# cv2.waitKey(0)
-	invert = 255 - thresh
-	# kernel = np.array([[0., 1., 0.], [1., 1., 1.], [0., 1., 0.]], np.uint8)
-	# dilated = cv2.dilate(invert, kernel)
-	# cv2.imshow('dilate',dilated)
-	# cv2.waitKey(0)
-	# contours, hierarchy = cv2.findContours(invert, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-	contours, hierarchy = cv2.findContours(invert, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-	contours = sorted(contours, key=cv2.contourArea, reverse=True)[:15]
-	location = None
-	for contour in contours:
-		peri = cv2.arcLength(contour, True)
-		approx = cv2.approxPolyDP(contour, 0.03*peri, True) 
-		if len(approx) == 4:
-			location = approx
-			break
-	if type(location) != type(None):
-		print("Corners of the contour are: ",location)
-		roi = get_perspective(img, location)
-		roi = cv2.rotate(roi, cv2.ROTATE_90_CLOCKWISE)
-		cv2.imshow('rotated image',roi)
-	else:
-		print("No quadrilaterals found")
-		return
-	coord=[]
-	return (roi, coord)
+		# Pre-process the image
+		img = cv.imread(img_path)
+		self.frame = cv.resize(img, (480,360))
 
-def get_text(img):
-	text=[]
-	return text
+		# This are some good threshold values I have found.
+		self.thres1 = 91
+		self.thres2 = 81
+		self.epsilon = 0.115
+
+		# Create windows if in debugging mode
+		self.debug = debug
+		if self.debug:
+			self.create_trackbars()
+
+	def create_trackbars(self):
+		cv.namedWindow(self.winName)
+		cv.createTrackbar('Threshold 1', self.winName, self.thres1, 1000, self.update_thres1)
+		cv.createTrackbar('Threshold 2', self.winName, self.thres2, 1000, self.update_thres2)
+		cv.createTrackbar('Epsilon', self.winName, int(self.epsilon*1000), 1000, self.update_epsilon)
+
+	def update_thres1(self,value):  self.thres1 = value; self.on_change()
+	def update_thres2(self,value):  self.thres2 = value; self.on_change()
+	def update_epsilon(self,value):  self.epsilon = value; self.on_change()
+	
+	def on_change(self):
+		self.detect_plate()
+		self.draw_window()
+
+	def draw_window(self):
+		tempFrame = np.copy(self.frame) # Make copy so we don't mod the orig
+		rect = cv.minAreaRect(self.coords)
+		box = cv.boxPoints(rect)
+		box = np.int0(box)
+		cv.drawContours(tempFrame,[box],0,(0,0,255),2)
+		cv.imshow(self.winName,tempFrame)
+		cv.imshow(self.winName+'1', self.plate)
+
+	def detect_plate(self):
+		'''
+		This function detects the number plate in the image 
+		and returns a cropped image focused on the number plate.
+		'''
+		self.coords = self.find_rect_contour()
+		self.plate = self.get_perspective(self.coords)
+	
+	def get_perspective(self, contour, height = 500, width = 500):
+		'''Get rectagular crop from a contour'''
+		# FIXME: The images are coming out at random rotations. This needs to be fixed.
+		rect = cv.minAreaRect(contour)
+		box = cv.boxPoints(rect)
+		location = np.int0(box)
+		pts1 = np.float32([location[0], location[3], location[1], location[2]])
+		pts2 = np.float32([[0, 0], [width, 0], [0, height], [width, height]])
+		# Apply Perspective Transform Algorithm
+		matrix = cv.getPerspectiveTransform(pts1, pts2)
+		result = cv.warpPerspective(self.frame, matrix, (width, height))
+		return result
+
+		## Simple Method of cropping image
+		# (x,y,w,h) = cv.boundingRect(box)
+		# crop = self.frame[y:y+h,x:x+w]
+		# return cv.resize(crop, (height,width))
+
+	def find_rect_contour(self):
+		'''Find the largest rectagular contour in the frame'''
+		gray = cv.cvtColor(self.frame,cv.COLOR_BGR2GRAY)
+		blur = cv.GaussianBlur(gray, (9,9), 0)
+		canny = cv.Canny(blur,self.thres1, self.thres2)   # Detect edges
+		contours, _ = cv.findContours(canny, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
+
+		if not len(contours):
+			print("No quadrilaterals found")
+			return  np.array([ [-1, -1], [-1, -1], [-1, -1], [-1, -1] ])
+
+		maxContour = None
+		maxArea = 0
+
+		#  Find largest rectangle
+		for contour in contours:
+			peri = cv.arcLength(contour, True)
+			approx = cv.approxPolyDP(contour, 0.115*peri, True)
+			
+			if len(approx) != 4: # Next if not rectangular
+				continue
+
+			(_,_,w,h) = cv.boundingRect(contour) # width, height
+			rect_area = w*h
+			
+			if rect_area > maxArea:
+				maxArea = rect_area
+				maxContour = contour
+
+		return maxContour
 
 def main():
-	# image_url = "./public/images/Arizona_47.jpg"
-	# image_url = "./public/images/Contrast.jpg"
-	image_url = "Challenges/public/images/Delaware_Plate.png"
-	img = cv2.imread(image_url, 0)
-	cv2.normalize(img, img, 50, 255, cv2.NORM_MINMAX)
-	detect_plate(img)
+	img1 = Detector('Delaware','Challenges/public/images/Delaware_Plate.png', True)
+	img2 = Detector('Contrast','Challenges/public/images/Contrast.jpg', True)
+	img3 = Detector('Arizonas','Challenges/public/images/Arizona_47.jpg', True)
 
-thres1 = 1
-thres2 = 0
-epsilon = 0.1
+	# img1.detect_plate()
+	# img3.detect_plate()
+	# img2.detect_plate()
 
-def update_thres1(value):
-	global thres1
-	thres1 = value
+	cv.waitKey(0)
 
-def update_thres2(value):
-	global thres2
-	thres2 = value
-
-def update_epsilon(value):
-	global epsilon
-	epsilon = value/5000
-
-def secondary():
-	global thres1
-	global thres2
-	image_url = ["Challenges/public/images/Delaware_Plate.png","Challenges/public/images/Arizona_47.jpg","Challenges/public/images/Contrast.jpg"]
-	cv2.namedWindow('Trackbars')
-	cv2.createTrackbar('Threshold 1', 'Trackbars', thres1, 1000, update_thres1)
-	cv2.createTrackbar('Threshold 2', 'Trackbars', thres2, 1000, update_thres2)
-	cv2.createTrackbar('Epsilon', 'Trackbars', 0, 1000, update_epsilon)
-
-	windowNames = ['Frame1', 'Frame2', 'Frame3']
-
-	while True:
-		for i in range(0,3):
-			frame = cv2.imread(image_url[i])
-			gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
-			scaled = cv2.resize(gray, (480,360))
-			blur = cv2.GaussianBlur(scaled,(9,9),0)
-			canny = cv2.Canny(blur,thres1,thres2)
-			closing = cv2.morphologyEx(canny, cv2.MORPH_CLOSE, (9,9))
-			contours, _ = cv2.findContours(closing, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-
-			
-
-			# contours, hierarchy = cv2.findContours(canny, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-			# contours = sorted(contours, key=cv2.contourArea, reverse=True)[:15]
-			# location = None
-			for contour in contours:
-				peri = cv2.arcLength(contour, True)
-				approx = cv2.approxPolyDP(contour, epsilon*peri, True) 
-				if len(approx) == 4:
-					# print(f'Found quad: {i}')
-					(x,y,w,h) = cv2.boundingRect(contour)
-					cv2.rectangle(canny, (x,y), (x+w,y+h), (255,255,255), 2)
-	
-			# if type(location) != type(None):
-			#   # print("Corners of the contour are: ",np.array(location))
-			#   (x,y,w,h) = cv2.boundingRect(contour)
-			#   cv2.rectangle(out, (x,y), (x+w,y+h), (255,0,255), 2)
-			# else:
-			#   print("No quadrilaterals found")
-
-			cv2.imshow(windowNames[i], canny)
-			if cv2.waitKey(1) & 0xFF == ord('q'): break
-
-
-if __name__ == "__main__":
-	secondary()
+if __name__ == '__main__':
+	main()
