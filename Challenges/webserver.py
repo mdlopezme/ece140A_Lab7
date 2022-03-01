@@ -1,18 +1,50 @@
-import imghdr
 from wsgiref.simple_server import make_server
-import cv2
 from pyramid.response import Response, FileResponse
 from pyramid.config import Configurator
 import threading
 from os import listdir
 from os.path import isfile, join
 from detector import Detector
-from PIL import Image
-import numpy as np
+import mysql.connector as mysql
+from dotenv import load_dotenv
+import os
 import cv2 as cv
 
-class Webserver():
+class Logger():
+    def __init__(self):
+        load_dotenv('credentials.env')
+        self.db_host = os.environ['MYSQL_HOST']
+        self.db_user = os.environ['MYSQL_USER']
+        self.db_pass = os.environ['MYSQL_PASSWORD']
+        self.db_name = os.environ['MYSQL_DATABASE']
+
+        self.db = mysql.connect(
+        host=self.db_host,
+        user=self.db_user,
+        password=self.db_pass,
+        database=self.db_name,
+        )
+
+        self.cursor = self.db.cursor()
+
+        print('Connected to database')
+
+    def __del__(self):
+        self.db.close()
+
+    def add_entry(self, img_name, lin_plate):
+        try:
+            self.cursor.execute(f'INSERT INTO Logs (name, text) VALUES (\'{img_name}\',\'{lin_plate}\');')
+            self.db.commit()
+            print("Added entry to database")
+        except:
+            print('Unable to add entry into database')
+        
+class Webserver(Logger):
     def __init__(self, root_path):
+        # Initialize logger
+        super().__init__()
+
         # Temp to make it work nice with our systems
         self.root_path = root_path
         self.pub_path = self.root_path + '/public'
@@ -64,6 +96,11 @@ class Webserver():
     def make_detector(self,req):
         the_name=req.params['image']
         self.detector = Detector(self.img_path+'/'+ the_name,'C',False)
+        self.detector.detect_plate()
+        self.detector.get_text()
+        
+        # Add entry to database
+        super().add_entry(the_name,self.detector.text)
 
         return Response('ok')
 
@@ -72,12 +109,10 @@ class Webserver():
         return FileResponse(self.pub_path+'/temp/frame.jpg')
 
     def get_plate(self,req):
-        self.detector.detect_plate()
         cv.imwrite(self.pub_path+'/temp/plate.jpg',self.detector.plate)
         return FileResponse(self.pub_path+'/temp/plate.jpg')
 
     def get_text(self,req):
-        self.detector.get_text()
         return Response(f'[\"{self.detector.text}\"]')
 
 if __name__ == '__main__':

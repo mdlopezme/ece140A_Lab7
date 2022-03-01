@@ -1,5 +1,6 @@
 import cv2 as cv
 import numpy as np
+import time
 
 class Detector:
 	def __init__(self, img_path, img_name='default', debug=False):
@@ -107,7 +108,7 @@ class Detector:
 			self.detect_plate()
 
 		roi = self.plate # :P
-		self.text = 'UNDER DEVELOPMENT'
+		self.text = str(time.time())
 
 def main():
 	img1 = Detector('Challenges/public/images/Delaware_Plate.png','Delaware', True)
