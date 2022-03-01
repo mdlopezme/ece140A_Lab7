@@ -1,3 +1,4 @@
 *.pyc
 *.env
 scratch*
+Challenges/public/temp/*
