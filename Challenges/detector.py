@@ -15,6 +15,10 @@ class Detector:
 		self.thres2 = 81
 		self.epsilon = 0.115
 
+		# Create internal vars
+		self.plate = None
+		self.coords = None
+
 		# Create windows if in debugging mode
 		self.debug = debug
 		if self.debug:

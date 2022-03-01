@@ -25,12 +25,14 @@ class Webserver():
             config.add_route('frame', '/frame')
             config.add_route('detect', '/detect')
             config.add_route('plate', '/plate')
+            config.add_route('text', '/text')
 
             # Creates views for routes
             config.add_view(self.get_home, route_name='home')
             config.add_view(self.get_names, route_name='names', renderer='json')
+            config.add_view(self.get_text, route_name='text', renderer='json')
             config.add_view(self.get_frame, route_name='frame')
-            config.add_view(self.make_detector, route_name='detect', renderer='json')
+            config.add_view(self.make_detector, route_name='detect')
             config.add_view(self.get_plate, route_name='plate')
 
             # Create static routes
@@ -63,7 +65,7 @@ class Webserver():
         the_name=req.params['image']
         self.detector = Detector(self.img_path+'/'+ the_name,'C',False)
 
-        return Response(f'[{the_name}]')
+        return Response('ok')
 
     def get_frame(self,req):
         cv.imwrite(self.pub_path+'/temp/frame.jpg',self.detector.frame)
@@ -73,6 +75,10 @@ class Webserver():
         self.detector.detect_plate()
         cv.imwrite(self.pub_path+'/temp/plate.jpg',self.detector.plate)
         return FileResponse(self.pub_path+'/temp/plate.jpg')
+
+    def get_text(self,req):
+        self.detector.get_text()
+        return Response(f'[\"{self.detector.text}\"]')
 
 if __name__ == '__main__':
     app = Webserver('./Challenges')

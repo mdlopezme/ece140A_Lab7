@@ -22,7 +22,6 @@ document.addEventListener("DOMContentLoaded", function() {
 function on_change(){
     // Create image dector
     fetch('/detect?image='+dropdown.value)
-        .then(response=>response)
         .then(function(response){
             console.log('Sucess making object: ' + response.url)
         })
@@ -35,6 +34,11 @@ function on_change(){
     car_plate.src = 'plate?image=' + dropdown.value
     car_image.alt = dropdown.value
 
-    // Set PLate String
-    lincese.innerHTML = 'TEMPLATE'
+    // Set Plate String
+    fetch('/text')
+        .then(response=>response.json())
+        .then(function(response){
+            lincese.innerHTML = response[0]
+        })
+    
 }
