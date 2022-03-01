@@ -6,7 +6,7 @@ import pytesseract
 import time
 
 # Read the image
-image_url = "./sudoku_test.jpeg"
+image_url = "Tutorials/Tutorial_2/sudoku_test.jpeg"
 img = cv2.imread(image_url, 0)
 # 0 is a simple alias for cv2.IMREAD_GRAYSCALE
 # cv2.imshow('original image',img)
@@ -22,13 +22,13 @@ blur = cv2.GaussianBlur(img.copy(), (1, 1), 0)
 
 # Threshold the image to get a binary image
 thresh = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
-cv2.imwrite("Threshold.png", thresh)
+# cv2.imwrite("Threshold.png", thresh)
 # cv2.imshow('thresh',thresh)
 # cv2.waitKey(0)
 
 # Invert the image to swap the foreground and background
 invert = 255 - thresh
-cv2.imwrite("Inverted.png", invert)
+# cv2.imwrite("Inverted.png", invert)
 # cv2.imshow('invert',invert)
 # cv2.waitKey(0)
 
@@ -78,7 +78,7 @@ def get_perspective(img, location, height = 900, width = 900):
 if type(location) != type(None):
     result = get_perspective(img, location)
     result = cv2.rotate(result, cv2.ROTATE_90_CLOCKWISE)
-    cv2.imwrite("Result.png", result)
+    # cv2.imwrite("Result.png", result)
     # cv2.imshow('result',result)
     # cv2.waitKey(0)
     result = get_perspective(thresh, location)
