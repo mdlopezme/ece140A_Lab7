@@ -139,6 +139,8 @@ for i in range(9):
     text = pytesseract.image_to_string(
       Image.fromarray(ans[9*i+j].astype(np.uint8)),
       lang='eng', config='--psm 11')
+    if not len(text):
+      continue
     # print(text[0])
     if ord(text[0]) >= 48 and ord(text[0]) <= 57:
       print(f'adding {text[0]} to matrix at {(i,j)}')

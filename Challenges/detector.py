@@ -1,4 +1,5 @@
 import cv2 as cv
+from cv2 import WARP_INVERSE_MAP
 import numpy as np
 import time
 
@@ -11,9 +12,10 @@ class Detector:
 		img = cv.imread(img_path)
 		self.frame = cv.resize(img, (480,360))
 
-		# This are some good threshold values I have found.
+		# This are some good edge detector threshold values I have found.
 		self.thres1 = 91
 		self.thres2 = 81
+		# The approximate polygon
 		self.epsilon = 0.115
 
 		# Create internal vars
@@ -58,25 +60,34 @@ class Detector:
 
 		return self.plate
 	
-	def __calc_perspective(self, height = 500, width = 500):
+	def __calc_perspective(self, height = 300, width = 520):
 		'''Get rectagular crop from a contour'''
 		# FIXME: The images are coming out at random rotations. This needs to be fixed. Needs better algo?
 		if self.coords is None:
 			self.__find_rect_contour()
 
 		rect = cv.minAreaRect(self.coords)
-		box = cv.boxPoints(rect)
-		location = np.int0(box)
-		pts1 = np.float32([location[0], location[3], location[1], location[2]])
-		pts2 = np.float32([[0, 0], [width, 0], [0, height], [width, height]])
+		peri=cv.arcLength(self.coords, True)
+		rect=cv.approxPolyDP(self.coords, 0.02*peri, False)
+		# box = cv.boxPoints(rect)
+		location = np.int0(rect)
+
+		# pts1 = np.float32([location[0], location[1], location[2], location[3]])
+		pts1 = np.float32([location[0], location[3], location[2], location[1]])
+		pts2 = np.float32([[0, 0], [width,0], [width,height], [0, height]])
 		# Apply Perspective Transform Algorithm
 		matrix = cv.getPerspectiveTransform(pts1, pts2)
+
 		self.plate = cv.warpPerspective(np.copy(self.frame), matrix, (width, height))
+		# cv.imshow('result',self.plate)
+		# cv.waitKey(0)
+
 
 	def __find_rect_contour(self):
 		'''Find the largest rectagular contour in the frame'''
-		gray = cv.cvtColor(self.frame,cv.COLOR_BGR2GRAY)
-		blur = cv.GaussianBlur(gray, (9,9), 0)
+		# gray = cv.cvtColor(self.frame,cv.COLOR_BGR2GRAY)
+		# blur = cv.GaussianBlur(gray, (9,9), 0)
+		blur = cv.GaussianBlur(self.frame, (9,9), 0)
 		canny = cv.Canny(blur,self.thres1, self.thres2)   # Detect edges
 		contours, _ = cv.findContours(canny, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
 
@@ -114,6 +125,9 @@ def main():
 	img1 = Detector('Challenges/public/images/Delaware_Plate.png','Delaware', True)
 	img2 = Detector('Challenges/public/images/Contrast.jpg','Contrast', True)
 	img3 = Detector('Challenges/public/images/Arizona_47.jpg','Arizonas', True)
+	
+
+	# new_img = img1.detect_plate()
 
 	cv.waitKey(0)
 
