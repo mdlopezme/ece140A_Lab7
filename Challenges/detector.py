@@ -130,17 +130,20 @@ class Detector:
 		# cv.imshow('roi',roi)
 		if not len(text):
 			text = pytesseract.image_to_string(self.frame, config='--psm 11')
-		for i in text.splitlines():
+
+		texts=text.splitlines()
+		for i in texts:
 			if len(i) > 4 and True in [char.isdigit() for char in i]:
 				print(i)
 				self.text=i
 				return
-		# print(f'The text: {text}')
-		for i in text.splitlines():
-			if len(i) > 4:
-				print(i)
-				self.text=i
-				return
+	
+		subtext=max(texts)
+		print(subtext)
+		if len(subtext)>0:
+			self.text=subtext
+			return
+	
 		self.text = "Plate value not found."
 
 def main():
