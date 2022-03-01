@@ -6,36 +6,36 @@ import time
 class Detector:
 	def __init__(self, img_path, img_name='default', debug=False):
 		# Set window name when showing the image
-		self.winName = img_name
+		self.__winName = img_name
 
 		# Pre-process the image
 		img = cv.imread(img_path)
 		self.frame = cv.resize(img, (480,360))
 
 		# This are some good edge detector threshold values I have found.
-		self.thres1 = 91
-		self.thres2 = 81
+		self.__thres1 = 91
+		self.__thres2 = 81
 		# The approximate polygon
-		self.epsilon = 0.115
+		self.__epsilon = 0.115
 
 		# Create internal vars
 		self.plate = None
-		self.coords = None
+		self.__coords = None
 
 		# Create windows if in debugging mode
-		self.debug = debug
-		if self.debug:
+		self.__debug = debug
+		if self.__debug:
 			self.__create_trackbars()
 
 	def __create_trackbars(self):
-		cv.namedWindow(self.winName)
-		cv.createTrackbar('Threshold 1', self.winName, self.thres1, 1000, self.__update_thres1)
-		cv.createTrackbar('Threshold 2', self.winName, self.thres2, 1000, self.__update_thres2)
-		cv.createTrackbar('Epsilon', self.winName, int(self.epsilon*1000), 1000, self.__update_epsilon)
+		cv.namedWindow(self.__winName)
+		cv.createTrackbar('Threshold 1', self.__winName, self.__thres1, 1000, self.__update_thres1)
+		cv.createTrackbar('Threshold 2', self.__winName, self.__thres2, 1000, self.__update_thres2)
+		cv.createTrackbar('Epsilon', self.__winName, int(self.__epsilon*1000), 1000, self.__update_epsilon)
 
-	def __update_thres1(self,value):  self.thres1 = value; self.__on_change()
-	def __update_thres2(self,value):  self.thres2 = value; self.__on_change()
-	def __update_epsilon(self,value):  self.epsilon = value; self.__on_change()
+	def __update_thres1(self,value):  self.__thres1 = value; self.__on_change()
+	def __update_thres2(self,value):  self.__thres2 = value; self.__on_change()
+	def __update_epsilon(self,value):  self.__epsilon = value; self.__on_change()
 	
 	def __on_change(self):
 		self.detect_plate()
@@ -43,22 +43,22 @@ class Detector:
 
 	def __draw_window(self):
 		tempFrame = np.copy(self.frame) # Make copy so we don't mod the orig
-		rect = cv.minAreaRect(self.coords)
+		rect = cv.minAreaRect(self.__coords)
 		box = cv.boxPoints(rect)
 		box = np.int0(box)
-		cv.drawContours(tempFrame,[self.coords],0,(0,0,255),2)
-		cv.imshow(self.winName,tempFrame)
-		cv.imshow(self.winName+'1', self.plate)
+		cv.drawContours(tempFrame,[self.__coords],0,(0,0,255),2)
+		cv.imshow(self.__winName,tempFrame)
+		cv.imshow(self.__winName+'1', self.plate)
 	
 	def __calc_perspective(self, height = 300, width = 520):
 		'''Get rectagular crop from a contour'''
 		# FIXME: The images are coming out at random rotations. This needs to be fixed. Needs better algo?
-		if self.coords is None:
+		if self.__coords is None:
 			self.__find_rect_contour()
 
-		rect = cv.minAreaRect(self.coords)
-		peri=cv.arcLength(self.coords, True)
-		rect=cv.approxPolyDP(self.coords, 0.02*peri, False)
+		rect = cv.minAreaRect(self.__coords)
+		peri=cv.arcLength(self.__coords, True)
+		rect=cv.approxPolyDP(self.__coords, 0.02*peri, False)
 		# box = cv.boxPoints(rect)
 		location = np.int0(rect)
 
@@ -78,7 +78,7 @@ class Detector:
 		# gray = cv.cvtColor(self.frame,cv.COLOR_BGR2GRAY)
 		# blur = cv.GaussianBlur(gray, (9,9), 0)
 		blur = cv.GaussianBlur(self.frame, (9,9), 0)
-		canny = cv.Canny(blur,self.thres1, self.thres2)   # Detect edges
+		canny = cv.Canny(blur,self.__thres1, self.__thres2)   # Detect edges
 		contours, _ = cv.findContours(canny, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
 
 		if not len(contours):
@@ -89,7 +89,7 @@ class Detector:
 		maxArea = 0
 		for contour in contours:
 			peri = cv.arcLength(contour, True)
-			approx = cv.approxPolyDP(contour, self.epsilon*peri, True)
+			approx = cv.approxPolyDP(contour, self.__epsilon*peri, True)
 			
 			if len(approx) != 4: # Next if not rectangular
 				continue
@@ -99,7 +99,7 @@ class Detector:
 			
 			if rect_area > maxArea:
 				maxArea = rect_area
-				self.coords = contour
+				self.__coords = contour
 
 	def detect_plate(self):
 		'''This function detects the number plate in the image.'''
