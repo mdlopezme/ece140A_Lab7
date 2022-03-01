@@ -127,21 +127,21 @@ class Detector:
 		# roi = cv.copyMakeBorder(self.plate,pad,pad,pad,pad,cv.BORDER_CONSTANT,value=(shade,shade,shade))
 		roi = cv.copyMakeBorder(self.plate,pad,pad,pad,pad,cv.BORDER_REPLICATE)
 		text = pytesseract.image_to_string(roi, config='--psm 11')
-		cv.imshow('roi',roi)
+		# cv.imshow('roi',roi)
 		if not len(text):
 			text = pytesseract.image_to_string(self.frame, config='--psm 11')
 		for i in text.splitlines():
 			if len(i) > 4 and True in [char.isdigit() for char in i]:
-				# print(i)
+				print(i)
 				self.text=i
 				return
 		# print(f'The text: {text}')
 		for i in text.splitlines():
 			if len(i) > 4:
-				# print(i)
+				print(i)
 				self.text=i
 				return
-		self.text = str(time.time())
+		self.text = "Plate value not found."
 
 def main():
 	img1 = Detector('Challenges/public/images/Delaware_Plate.png','Delaware', True)
