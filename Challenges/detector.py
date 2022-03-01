@@ -25,23 +25,23 @@ class Detector:
 		# Create windows if in debugging mode
 		self.debug = debug
 		if self.debug:
-			self.create_trackbars()
+			self.__create_trackbars()
 
-	def create_trackbars(self):
+	def __create_trackbars(self):
 		cv.namedWindow(self.winName)
-		cv.createTrackbar('Threshold 1', self.winName, self.thres1, 1000, self.update_thres1)
-		cv.createTrackbar('Threshold 2', self.winName, self.thres2, 1000, self.update_thres2)
-		cv.createTrackbar('Epsilon', self.winName, int(self.epsilon*1000), 1000, self.update_epsilon)
+		cv.createTrackbar('Threshold 1', self.winName, self.thres1, 1000, self.__update_thres1)
+		cv.createTrackbar('Threshold 2', self.winName, self.thres2, 1000, self.__update_thres2)
+		cv.createTrackbar('Epsilon', self.winName, int(self.epsilon*1000), 1000, self.__update_epsilon)
 
-	def update_thres1(self,value):  self.thres1 = value; self.on_change()
-	def update_thres2(self,value):  self.thres2 = value; self.on_change()
-	def update_epsilon(self,value):  self.epsilon = value; self.on_change()
+	def __update_thres1(self,value):  self.thres1 = value; self.__on_change()
+	def __update_thres2(self,value):  self.thres2 = value; self.__on_change()
+	def __update_epsilon(self,value):  self.epsilon = value; self.__on_change()
 	
-	def on_change(self):
+	def __on_change(self):
 		self.detect_plate()
-		self.draw_window()
+		self.__draw_window()
 
-	def draw_window(self):
+	def __draw_window(self):
 		tempFrame = np.copy(self.frame) # Make copy so we don't mod the orig
 		rect = cv.minAreaRect(self.coords)
 		box = cv.boxPoints(rect)
@@ -49,16 +49,6 @@ class Detector:
 		cv.drawContours(tempFrame,[self.coords],0,(0,0,255),2)
 		cv.imshow(self.winName,tempFrame)
 		cv.imshow(self.winName+'1', self.plate)
-
-	def detect_plate(self):
-		'''
-		This function detects the number plate in the image 
-		and returns a cropped image focused on the number plate.
-		'''
-		self.__find_rect_contour()
-		self.__calc_perspective()
-
-		return self.plate
 	
 	def __calc_perspective(self, height = 300, width = 520):
 		'''Get rectagular crop from a contour'''
@@ -110,6 +100,11 @@ class Detector:
 			if rect_area > maxArea:
 				maxArea = rect_area
 				self.coords = contour
+
+	def detect_plate(self):
+		'''This function detects the number plate in the image.'''
+		self.__find_rect_contour()
+		self.__calc_perspective()
 
 	def get_text(self):
 		'''Get the lincense plate string from the crop image'''
