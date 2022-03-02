@@ -115,12 +115,13 @@ class Webserver(Logger):
     def get_text(self,req):
         return Response(f'[\"{self.detector.text}\"]')
 
-if __name__ == '__main__':
+def main():
     app = Webserver('./Challenges')
    
     try:
         app.start()
-        # while(True):
-        #     sleep(100)
     except KeyboardInterrupt:
         app.stop()
+
+if __name__ == '__main__':
+    main()

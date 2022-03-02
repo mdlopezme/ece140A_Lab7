@@ -1,8 +1,5 @@
 import cv2 as cv
-from cv2 import WARP_INVERSE_MAP
 import numpy as np
-from PIL import Image
-import time
 import pytesseract
 
 class Detector:
@@ -54,7 +51,6 @@ class Detector:
 	
 	def __calc_perspective(self, height = 300, width = 520):
 		'''Get rectagular crop from a contour'''
-		# FIXME: The images are coming out at random rotations. This needs to be fixed. Needs better algo?
 		if self.__coords is None:
 			self.__find_rect_contour()
 
@@ -75,8 +71,6 @@ class Detector:
 
 	def __find_rect_contour(self):
 		'''Find the largest rectagular contour in the frame'''
-		# gray = cv.cvtColor(self.frame,cv.COLOR_BGR2GRAY)
-		# blur = cv.GaussianBlur(gray, (9,9), 0)
 		blur = cv.GaussianBlur(self.frame, (9,9), 0)
 		canny = cv.Canny(blur,self.__thres1, self.__thres2)   # Detect edges
 		contours, _ = cv.findContours(canny, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
@@ -106,12 +100,6 @@ class Detector:
 		self.__find_rect_contour()
 		self.__calc_perspective()
 
-	# # pad numpy arrays helper from numpy.org
-	# def __pad_with(self,vector, pad_width, iaxis, kwargs):
-	# 		pad_value = kwargs.get('padder', 10)
-	# 		vector[:pad_width[0]] = pad_value
-	# 		vector[-pad_width[1]:] = pad_value
-
 	def get_text(self):
 		'''Get the lincense plate string from the crop image'''
 		
@@ -119,15 +107,10 @@ class Detector:
 		if self.plate is None:
 			self.detect_plate()
 
-		# roi = np.pad(self.plate, 20, self.__pad_with, padder=255)
-		# roi = Image.fromarray(roi)
-
 		pad=10
-		# shade=200
-		# roi = cv.copyMakeBorder(self.plate,pad,pad,pad,pad,cv.BORDER_CONSTANT,value=(shade,shade,shade))
 		roi = cv.copyMakeBorder(self.plate,pad,pad,pad,pad,cv.BORDER_REPLICATE)
 		text = pytesseract.image_to_string(roi, config='--psm 11')
-		# cv.imshow('roi',roi)
+
 		if not len(text):
 			text = pytesseract.image_to_string(self.frame, config='--psm 11')
 
@@ -151,7 +134,6 @@ def main():
 	img2 = Detector('Challenges/public/images/Contrast.jpg','Contrast', True)
 	img3 = Detector('Challenges/public/images/Arizona_47.jpg','Arizonas', True)
 	
-
 	# new_img = img1.detect_plate()
 	img1.get_text()
 	img2.get_text()
