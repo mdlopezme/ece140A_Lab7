@@ -72,10 +72,10 @@ class Webserver(Logger):
 
             app = config.make_wsgi_app()
 
-        self.server = make_server('localhost', 6543, app)
+        self.server = make_server('0.0.0.0', 6543, app)
 
     def start(self):
-        print('Web server started on: http://localhost:6543')
+        print('Web server started on: http://192.168.0.100:6543')
         self.server_thread=threading.Thread(target=self.server.serve_forever,name="Web Server")
         self.server_thread.start()
         self.server_thread.join()
