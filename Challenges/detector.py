@@ -106,32 +106,38 @@ class Detector:
 		pad=20
 		roi = cv.copyMakeBorder(self.plate,pad,pad,pad,pad,cv.BORDER_REPLICATE)
 		text = pytesseract.image_to_string(roi, config='--psm 11')
-
-		if not len(text):
+		print(text)
+		print(self.__coords)
+		print(type(self.__coords))
+		# if not len(text):
+		if not text:
+			print('null')
 			text = pytesseract.image_to_string(self.frame, config='--psm 11')
 
 		texts=text.splitlines()
-		for i in texts:
-			if len(i) > 4 and True in [char.isdigit() for char in i]:
-				print(i)
-				self.text=i
-				return
-		if texts:
+		if texts and texts[0]!='':
+			print(texts)
+			for i in texts:
+				if len(i) > 4 and True in [char.isdigit() for char in i]:
+					print(i)
+					self.text=i
+					return
+		
 			subtext=max(texts)
 			if len(subtext)>2:
 				print(subtext)
 				self.text=subtext
 				return
-	
+		print('Text not found')
 		self.text = "Plate value not found."
 
 def main():
-	img1 = Detector('Challenges/public/images/Delaware_Plate.png','Delaware', True)
+	# img1 = Detector('Challenges/public/images/Delaware_Plate.png','Delaware', True)
 	img2 = Detector('Challenges/public/images/Contrast.jpg','Contrast', True)
 	img3 = Detector('Challenges/public/images/Arizona_47.jpg','Arizonas', True)
 	
 	# new_img = img1.detect_plate()
-	img1.get_text()
+	# img1.get_text()
 	img2.get_text()
 	img3.get_text()
 	cv.waitKey(0)
