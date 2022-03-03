@@ -13,5 +13,6 @@ In this tutorial we learned to install opencv2 onto the raspberry pi. And learne
 Tesseract and PyTesseract were installed for OCR. PyTesseract was used with OpenCV to extract a sudoku puzzle from an image.  
 The default settings did not result in any extracted values. Some things learned:  
 - Tesseract does not work very well with single characters. Strings are better.
+- Changing the `psm` parameter to 10 instead of 11 improved the single character recognition.
 - The current version prefers black text on white backgrounds.
 - The best results were obtained on an image with minimal blurring and with threshold applied.
