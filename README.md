@@ -2,7 +2,8 @@
 ## Information
 Olivier Rogers: A16069362  
 Moises Lopez: A14156109
-
+## Introduction
+In this lab we learned how tho hook up a camera to the pi and we learned methods for detecting text from images by doing some image transfromations and using Tesseract for optical character recognition.
 ## Challenge: Number Plate Detector
 [Video Demonstration](https://youtu.be/q9RuNE5BRkY)
 ### Approach to finding the area of interest
