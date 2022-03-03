@@ -10,6 +10,7 @@ class Detector:
 		# Pre-process the image
 		img = cv.imread(img_path)
 		self.frame = cv.resize(img, (480,360))
+		# self.frame = img
 
 		# This are some good edge detector threshold values I have found.
 		self.__thres1 = 91
@@ -54,18 +55,12 @@ class Detector:
 		if self.__coords is None:
 			self.__find_rect_contour()
 
-		rect = cv.minAreaRect(self.__coords)
-		peri=cv.arcLength(self.__coords, True)
-		rect=cv.approxPolyDP(self.__coords, 0.02*peri, False)
-		# box = cv.boxPoints(rect)
-		location = np.int0(rect)
-
-		# pts1 = np.float32([location[0], location[1], location[2], location[3]])
-		pts1 = np.float32([location[0], location[3], location[2], location[1]])
+		point = np.int0(self.__coords)
+		pts1 = np.float32([point[0], point[3], point[2], point[1]])
 		pts2 = np.float32([[0, 0], [width,0], [width,height], [0, height]])
+
 		# Apply Perspective Transform Algorithm
 		matrix = cv.getPerspectiveTransform(pts1, pts2)
-
 		self.plate = cv.warpPerspective(np.copy(self.frame), matrix, (width, height))
 
 
@@ -93,7 +88,8 @@ class Detector:
 			
 			if rect_area > maxArea:
 				maxArea = rect_area
-				self.__coords = contour
+				# self.__coords = contour
+				self.__coords = approx
 
 	def detect_plate(self):
 		'''This function detects the number plate in the image.'''
@@ -122,8 +118,8 @@ class Detector:
 				return
 	
 		subtext=max(texts)
-		print(subtext)
 		if len(subtext)>0:
+			print(subtext)
 			self.text=subtext
 			return
 	
