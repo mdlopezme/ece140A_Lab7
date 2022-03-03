@@ -4,7 +4,7 @@ Olivier Rogers: A16069362
 Moises Lopez: A14156109
 
 ## Challenge: Number Plate Detector
-
+[Video Demonstration](https://youtu.be/q9RuNE5BRkY)
 ### Approach to finding the area of interest
 1. Blur the image to remove high frequencies
 2. Pass the image though a canny edge detected
@@ -13,6 +13,8 @@ Moises Lopez: A14156109
 5. Do polygon approximation for each contour
 6. Ignored approximated polygons that are not 4 sided.
 4. Pick the first 4 sided poligon, since that is the biggest rectangle in the image.
+
+
 
 ## Tutorial 1: Say Cheese!
 In this tutorial we learned to install opencv2 onto the raspberry pi. And learned how to capture a image from a webcam in python.  
