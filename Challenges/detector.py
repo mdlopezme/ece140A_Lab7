@@ -103,7 +103,7 @@ class Detector:
 		if self.plate is None:
 			self.detect_plate()
 
-		pad=10
+		pad=20
 		roi = cv.copyMakeBorder(self.plate,pad,pad,pad,pad,cv.BORDER_REPLICATE)
 		text = pytesseract.image_to_string(roi, config='--psm 11')
 
@@ -116,12 +116,12 @@ class Detector:
 				print(i)
 				self.text=i
 				return
-	
-		subtext=max(texts)
-		if len(subtext)>0:
-			print(subtext)
-			self.text=subtext
-			return
+		if texts:
+			subtext=max(texts)
+			if len(subtext)>2:
+				print(subtext)
+				self.text=subtext
+				return
 	
 		self.text = "Plate value not found."
 
