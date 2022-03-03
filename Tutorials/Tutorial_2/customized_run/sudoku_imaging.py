@@ -6,7 +6,7 @@ import pytesseract
 import time
 
 # Read the image
-image_url = "./sudoku_test.jpeg"
+image_url = "Tutorials/Tutorial_2/sudoku_test.jpeg"
 img = cv2.imread(image_url, 0)
 # 0 is a simple alias for cv2.IMREAD_GRAYSCALE
 # cv2.imshow('original image',img)
@@ -22,13 +22,13 @@ blur = cv2.GaussianBlur(img.copy(), (1, 1), 0)
 
 # Threshold the image to get a binary image
 thresh = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
-cv2.imwrite("Threshold.png", thresh)
+# cv2.imwrite("Threshold.png", thresh)
 # cv2.imshow('thresh',thresh)
 # cv2.waitKey(0)
 
 # Invert the image to swap the foreground and background
 invert = 255 - thresh
-cv2.imwrite("Inverted.png", invert)
+# cv2.imwrite("Inverted.png", invert)
 # cv2.imshow('invert',invert)
 # cv2.waitKey(0)
 
@@ -78,7 +78,7 @@ def get_perspective(img, location, height = 900, width = 900):
 if type(location) != type(None):
     result = get_perspective(img, location)
     result = cv2.rotate(result, cv2.ROTATE_90_CLOCKWISE)
-    cv2.imwrite("Result.png", result)
+    # cv2.imwrite("Result.png", result)
     # cv2.imshow('result',result)
     # cv2.waitKey(0)
     result = get_perspective(thresh, location)
@@ -86,9 +86,10 @@ if type(location) != type(None):
     # cv2.imshow('result',result)
     # cv2.waitKey(0) 
     # cv2.destroyAllWindows()
+    
 print('Extracting the Numbers')
 
-# pad numpy arrays helper
+# pad numpy arrays helper from numpy.org
 def pad_with(vector, pad_width, iaxis, kwargs):
     pad_value = kwargs.get('padder', 10)
     vector[:pad_width[0]] = pad_value
@@ -138,6 +139,8 @@ for i in range(9):
     text = pytesseract.image_to_string(
       Image.fromarray(ans[9*i+j].astype(np.uint8)),
       lang='eng', config='--psm 11')
+    if not len(text):
+      continue
     # print(text[0])
     if ord(text[0]) >= 48 and ord(text[0]) <= 57:
       print(f'adding {text[0]} to matrix at {(i,j)}')
