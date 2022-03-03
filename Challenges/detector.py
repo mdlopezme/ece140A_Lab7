@@ -125,9 +125,9 @@ class Detector:
 		# print(self.__coords)
 		# print(type(self.__coords))
 		# if not len(text):
-		if not text:
-			print('null')
-			text = pytesseract.image_to_string(self.frame, config='--psm 11')
+		# if not text:
+		# 	print('null')
+		# 	text = pytesseract.image_to_string(self.frame, config='--psm 11')
 
 		texts=text.splitlines()
 		if texts:
@@ -147,13 +147,13 @@ class Detector:
 		self.text = "Plate value not found."
 
 def main():
-	img1 = Detector('Challenges/public/images/Delaware_Plate.png','Delaware', True)
-	img2 = Detector('Challenges/public/images/Contrast.jpg','Contrast', True)
+	# img1 = Detector('Challenges/public/images/Delaware_Plate.png','Delaware', True)
+	# img2 = Detector('Challenges/public/images/Contrast.jpg','Contrast', True)
 	img3 = Detector('Challenges/public/images/Arizona_47.jpg','Arizonas', True)
 	
 	# new_img = img1.detect_plate()
-	img1.get_text()
-	img2.get_text()
+	# img1.get_text()
+	# img2.get_text()
 	img3.get_text()
 	cv.waitKey(0)
 
