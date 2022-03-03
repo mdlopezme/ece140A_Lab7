@@ -99,11 +99,11 @@ def pad_with(vector, pad_width, iaxis, kwargs):
 def split_boxes(board, input_size=40):
   rows = np.vsplit(board,9)
   boxes = []
-  n = 5
+  n = 15
   for r in rows:
     cols = np.hsplit(r,9)
     for box in cols:
-      # box = box[n:-n,n:-n]
+      box = box[n:-n,n:-n]
       box = np.pad(box, 20, pad_with, padder=255)
       # box = cv2.resize(box, (input_size, input_size))/255.0
       box = cv2.GaussianBlur(box, (3, 3), 0)
@@ -138,7 +138,7 @@ for i in range(9):
 
     text = pytesseract.image_to_string(
       Image.fromarray(ans[9*i+j].astype(np.uint8)),
-      lang='eng', config='--psm 11')
+      lang='eng', config='--psm 10')
     if not len(text):
       continue
     # print(text[0])
