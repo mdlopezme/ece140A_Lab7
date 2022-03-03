@@ -130,7 +130,7 @@ class Detector:
 			text = pytesseract.image_to_string(self.frame, config='--psm 11')
 
 		texts=text.splitlines()
-		if texts and texts[0]!='':
+		if texts:
 			print(texts)
 			for i in texts:
 				if len(i) > 4 and True in [char.isdigit() for char in i]:
