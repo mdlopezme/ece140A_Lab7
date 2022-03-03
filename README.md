@@ -7,13 +7,12 @@ Moises Lopez: A14156109
 [Video Demonstration](https://youtu.be/q9RuNE5BRkY)
 ### Approach to finding the area of interest
 1. Blur the image to remove high frequencies
-2. Pass the image though a canny edge detected
+2. Pass the image though a canny edge detector
 3. Find the contour and sort them by contour area
-4. drop everything but the biggest 25 contours.
-5. Do polygon approximation for each contour
-6. Ignored approximated polygons that are not 4 sided.
-4. Pick the first 4 sided poligon, since that is the biggest rectangle in the image.
-
+4. Do polygon approximation for each contour
+5. Ignored approximated polygons that are not 4 sided.
+6. Pick the first 4 sided poligon, since that is the biggest rectangle in the image.
+7. If no rectangle found, send original image to OCR
 
 
 ## Tutorial 1: Say Cheese!
