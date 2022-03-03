@@ -55,6 +55,21 @@ class Detector:
 		if self.__coords is None:
 			self.__find_rect_contour()
 
+		# print(self.__coords[0])
+		for p1 in self.__coords:
+			dist = []
+			for p2 in self.__coords:
+				if p1[0][0] == p2[0][0] and p1[0][1] == p2[0][1]: # Ignored if same point
+					continue
+
+				dist.append((p1[0][0] - p2[0][0])**2+(p1[0][1] - p2[0][1])**2)
+			dist = dist/min(dist)
+			if max(dist) > 5000:
+				self.plate = np.copy(self.frame)
+				print(self.__winName+ ' is bad')
+				return
+				
+
 		point = np.int0(self.__coords)
 		pts1 = np.float32([point[0], point[3], point[2], point[1]])
 		pts2 = np.float32([[0, 0], [width,0], [width,height], [0, height]])
@@ -106,9 +121,9 @@ class Detector:
 		pad=20
 		roi = cv.copyMakeBorder(self.plate,pad,pad,pad,pad,cv.BORDER_REPLICATE)
 		text = pytesseract.image_to_string(roi, config='--psm 11')
-		print(text)
-		print(self.__coords)
-		print(type(self.__coords))
+		# print(text)
+		# print(self.__coords)
+		# print(type(self.__coords))
 		# if not len(text):
 		if not text:
 			print('null')
@@ -132,12 +147,12 @@ class Detector:
 		self.text = "Plate value not found."
 
 def main():
-	# img1 = Detector('Challenges/public/images/Delaware_Plate.png','Delaware', True)
+	img1 = Detector('Challenges/public/images/Delaware_Plate.png','Delaware', True)
 	img2 = Detector('Challenges/public/images/Contrast.jpg','Contrast', True)
 	img3 = Detector('Challenges/public/images/Arizona_47.jpg','Arizonas', True)
 	
 	# new_img = img1.detect_plate()
-	# img1.get_text()
+	img1.get_text()
 	img2.get_text()
 	img3.get_text()
 	cv.waitKey(0)
