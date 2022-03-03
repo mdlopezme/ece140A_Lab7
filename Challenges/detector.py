@@ -131,7 +131,6 @@ class Detector:
 
 		texts=text.splitlines()
 		if texts:
-			print(texts)
 			for i in texts:
 				if len(i) > 4 and True in [char.isdigit() for char in i]:
 					print(i)
